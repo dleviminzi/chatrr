@@ -2,6 +2,13 @@
 
 Chatrr is a command line chatbot built around the openai api with one special feature: a memory! 
 
+## How to use it
+You need to have set the environment variable `OPENAI_API_KEY` to be your openai api key. Then:
+```
+make build
+./bin/chatrr
+```
+
 ## How it works
 When you submit input, it will be embedded and then used to query a [sqlite database with the vector similarity search extension](https://github.com/asg017/sqlite-vss). If the results have strong similarity, they will be constructed into a "memory", prepended to your input, and sent to the completions api. This allows the bot to do cool things like remember your name from one conversation to the next or remember details of a project you were discussing. 
 ![image](https://github.com/dleviminzi/chatrr/assets/51272568/6a804546-6414-404f-9369-4bb561a17493)

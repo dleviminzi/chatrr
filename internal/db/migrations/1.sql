@@ -3,14 +3,14 @@ create virtual table conversation_fragment_embeddings using vss0(
 );
 
 create table conversations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    conversation TEXT
+    id integer primary key autoincrement,
+    conversation text
 );
 
 create table conversation_fragments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    conversation_id INTEGER,
-    conversation_fragment TEXT
+    id integer primary key autoincrement,
+    conversation_id integer,
+    conversation_fragment text
 );
 
 create virtual table document_fragment_embeddings using vss0(
@@ -18,12 +18,12 @@ create virtual table document_fragment_embeddings using vss0(
 );
 
 create table documents (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    document TEXT
+    id integer primary key autoincrement,
+    document text
 );
 
 create table document_fragments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    document_id INTEGER,
-    document_fragment TEXT
+    id integer primary key autoincrement,
+    document_id integer,
+    document_fragment text
 );

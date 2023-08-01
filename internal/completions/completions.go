@@ -8,17 +8,19 @@ import (
 
 type OpenAiCompleter struct {
 	client *openai.Client
+	model  string
 }
 
-func NewOpenAiCompleter(client *openai.Client) OpenAiCompleter {
+func NewOpenAiCompleter(client *openai.Client, model string) OpenAiCompleter {
 	return OpenAiCompleter{
 		client: client,
+		model:  model,
 	}
 }
 
 func (o OpenAiCompleter) Complete(ctx context.Context, msgs []openai.ChatCompletionMessage) (openai.ChatCompletionResponse, error) {
 	return o.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{ // TODO: make configurable
-		Model:    openai.GPT3Dot5Turbo16K,
+		Model:    o.model,
 		Messages: msgs,
 	})
 }

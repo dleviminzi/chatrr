@@ -15,6 +15,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/asg017/sqlite-vss/bindings/go"
 	_ "github.com/mattn/go-sqlite3"
@@ -137,15 +138,18 @@ func (d *DatabaseConnection) Initialize() error {
 }
 
 func (d DatabaseConnection) CreateConversationMemories(memoryEmbeddings [][]float32, conversationId int, conversationFragment []openai.ChatCompletionMessage) error {
+	t := time.Now().Format(time.UnixDate)
+
 	for _, embedding := range memoryEmbeddings {
-		if err := d.CreateConversationMemory(embedding, conversationId, conversationFragment); err != nil {
+		if err := d.CreateConversationMemory(embedding, conversationId, conversationFragment, t); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
-func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, conversationId int, conversationFragment []openai.ChatCompletionMessage) error {
+func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, conversationId int, conversationFragment []openai.ChatCompletionMessage, t string) error {
 	bytePromptEmbedding := byteEmbedding(memoryEmbedding)
 
 	strConversationFragment, err := stringifyConversationFragment(conversationFragment)
@@ -158,7 +162,7 @@ func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, 
 		log.Fatal(err)
 	}
 
-	f, err := tx.Exec("INSERT INTO conversation_fragments (conversation_id, conversation_fragment) VALUES (?, ?)", conversationId, strConversationFragment)
+	f, err := tx.Exec("INSERT INTO conversation_fragments (conversation_id, conversation_fragment, fragment_time) VALUES (?, ?, ?)", conversationId, strConversationFragment, t)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -176,27 +180,21 @@ func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, 
 }
 
 func (d DatabaseConnection) GetConversationMemories(promptEmbedding []float32) ([]models.RecalledMemory, error) {
-	// TODO: add cosine similarity calculation to vss extension and return that as well for decision making
 	query := `
 		with matches as (
-			select rowid, embedding, vss_cosine_similarity(embedding, ?1) similarity
-			from conversation_fragment_embeddings 
-			where vss_search(embedding, ?1)
-			limit 20
+			select cf.conversation_fragment, max(vss_cosine_similarity(e.embedding, ?1)) as similarity
+			from conversation_fragment_embeddings e
+			left join conversation_fragments cf on cf.id = e.rowid
+			group by cf.conversation_fragment
 		), final as (
-			select
-			cf.rowid,
-			cf.conversation_id,
-			cf.conversation_fragment,
-			m.similarity
+			select cf.conversation_fragment, cf.fragment_time, m.similarity
 			from matches m
-			left join conversation_fragments cf on cf.id = m.rowid
+			left join conversation_fragments cf on cf.conversation_fragment = m.conversation_fragment
 		)
-		select conversation_fragment, max(similarity) 
+		select conversation_fragment, similarity, fragment_time
 		from final 
-		group by conversation_fragment
 		order by similarity desc
-		limit 5
+		limit 10
 	`
 
 	bytePromptEmbedding := byteEmbedding(promptEmbedding)
@@ -208,18 +206,19 @@ func (d DatabaseConnection) GetConversationMemories(promptEmbedding []float32) (
 	defer rows.Close()
 
 	var memories []models.RecalledMemory
-	// FIXME: bug in vss sqlite extension that makes this explode when the result contains no rows
 	for rows.Next() {
 		var cm string
 		var sim float32
+		var ft string
 
-		if err := rows.Scan(&cm, &sim); err != nil {
+		if err := rows.Scan(&cm, &sim, &ft); err != nil {
 			return nil, err
 		}
 
 		memories = append(memories, models.RecalledMemory{
 			ConversationFragment: cm,
 			SimilarityScore:      sim,
+			FragmentTime:         ft,
 		})
 	}
 

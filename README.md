@@ -23,9 +23,12 @@ If you would like the bot to remember the response it gave to your last prompt t
 4. If you have a long conversation and ask the bot to remember the entire thing, it might exceed the context limit in future conversations (this will probably break the bot).
 
 ## Future improvements
-- [ ] Embed entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
+- [x] Add timestamps to conversation fragments
+- [x] Fix zero entry query sqlite vss explosion
 - [ ] Make completion model configurable
-- [ ] Add timestamps to conversation fragments
-- [ ] Explore possibility of eviction policy for memories
-- [ ] Add feature for bot to ingest documents (stored seperately)
 - [ ] Use [tiktoken](https://github.com/pkoukk/tiktoken-go) to ensure that we don't exceed model context limitations
+- [ ] Claude support
+- [ ] Add feature for bot to ingest documents (stored seperately)
+- [ ] Add cli flagging for experimental features
+- [ ] Experiment with embedding entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
+- [ ] Experiment with eviction policies for memories

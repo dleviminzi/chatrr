@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -25,18 +26,18 @@ to create a memory of the last n (prompt, response) pairs.`
 func main() {
 	var (
 		ctx          = context.Background()
+		model        string
 		openaiKey    = os.Getenv("OPENAI_API_KEY")
-		reader       = bufio.NewReader(os.Stdin)
 		openaiClient = openai.NewClient(openaiKey)
-		completer    = completions.NewOpenAiCompleter(openaiClient)
-		embedder     = embeddings.NewOpenAiEmbedder(openaiClient)
 		db           = db.NewDatabaseConnection()
-		chatrr       = chatrr.NewChatrr(db, embedder, completer)
 	)
 	defer db.DB.Close()
 
-	// FIXME: temporary fix for sqlite3 vss explosion on zero row issue
-	chatrr.Memorize(ctx, 1)
+	flag.StringVar(&model, "model", openai.GPT3Dot5Turbo16K, "which model to use (default gpt3.5 turbo 16k)")
+	flag.Parse()
+	completer := completions.NewOpenAiCompleter(openaiClient, model)
+	embedder := embeddings.NewOpenAiEmbedder(openaiClient)
+	chatrr := chatrr.NewChatrr(db, embedder, completer)
 
 	// Handle SIGINT
 	c := make(chan os.Signal, 1)
@@ -51,6 +52,7 @@ func main() {
 	fmt.Println(explanation)
 
 	// Chat loop
+	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("User: ")
 		input, _ := reader.ReadString('\n')

@@ -25,10 +25,15 @@ If you would like the bot to remember the response it gave to your last prompt t
 ## Future improvements
 - [x] Add timestamps to conversation fragments
 - [x] Fix zero entry query sqlite vss explosion
-- [ ] Make completion model configurable
-- [ ] Use [tiktoken](https://github.com/pkoukk/tiktoken-go) to ensure that we don't exceed model context limitations
+- [x] Make completion model configurable
+- [ ] Real conversation ids
 - [ ] Claude support
 - [ ] Add feature for bot to ingest documents (stored seperately)
 - [ ] Add cli flagging for experimental features
-- [ ] Experiment with embedding entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
-- [ ] Experiment with eviction policies for memories
+
+## Experiments
+- [ ] Embed entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
+- [ ] Eviction policies for memories
+- [ ] During memorization use openai function api to get list of tags summarizing what is being memorized to store the embedding with
+- [ ] Research methods for calculating information density
+- [ ] Research methods for calculating novelty against an established corpus

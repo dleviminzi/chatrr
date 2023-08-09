@@ -15,6 +15,8 @@ import (
 type DatabaseConnector interface {
 	GetConversationMemories(embedding []float32) ([]models.RecalledMemory, error)
 	CreateConversationMemories(embedding [][]float32, conversationId int, input []openai.ChatCompletionMessage) error
+	CreateConversation([]openai.ChatCompletionMessage) (int, error)
+	UpdateConversatoin(convoId int, convo []openai.ChatCompletionMessage) error
 }
 
 type Embedder interface {
@@ -30,6 +32,7 @@ type Chatrr struct {
 	embedder  Embedder
 	completer Completer
 	msgs      []openai.ChatCompletionMessage
+	convoId   int
 }
 
 func NewChatrr(db DatabaseConnector, embedder Embedder, completer Completer) Chatrr {
@@ -44,6 +47,20 @@ func NewChatrr(db DatabaseConnector, embedder Embedder, completer Completer) Cha
 			},
 		},
 	}
+}
+
+func (c *Chatrr) NewActiveConvo() error {
+	convoId, err := c.db.CreateConversation(c.msgs)
+	if err != nil {
+		return err
+	}
+
+	c.convoId = convoId
+	return nil
+}
+
+func (c *Chatrr) StoreActiveConvo() error {
+	return c.db.UpdateConversatoin(c.convoId, c.msgs)
 }
 
 func (c *Chatrr) GetResponse(ctx context.Context, userInput string) (string, error) {
@@ -102,8 +119,7 @@ func (c Chatrr) Memorize(ctx context.Context, numBack int) {
 	}
 
 	// TODO: come up with conversation storage plan
-	// (using 1 is fine for poc, but want to actually store conversation eventually)
-	err := c.db.CreateConversationMemories(embeddings, 1, c.msgs[start:])
+	err := c.db.CreateConversationMemories(embeddings, c.convoId, c.msgs[start:])
 	if err != nil {
 		log.Println(err.Error())
 	}

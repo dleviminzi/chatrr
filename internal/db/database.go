@@ -225,6 +225,39 @@ func (d DatabaseConnection) GetConversationMemories(promptEmbedding []float32) (
 	return memories, nil
 }
 
+func (d DatabaseConnection) CreateConversation(convo []openai.ChatCompletionMessage) (int, error) {
+	s, err := stringifyConversationFragment(convo)
+	if err != nil {
+		return -1, err
+	}
+
+	result, err := d.DB.Exec(`insert into conversations (conversation) values (?)`, s)
+	if err != nil {
+		return -1, err
+	}
+
+	lastId, err := result.LastInsertId()
+	if err != nil {
+		return -1, err
+	}
+
+	return int(lastId), nil
+}
+
+func (d DatabaseConnection) UpdateConversatoin(convoId int, convo []openai.ChatCompletionMessage) error {
+	s, err := stringifyConversationFragment(convo)
+	if err != nil {
+		return err
+	}
+
+	_, err = d.DB.Exec(`update conversations set conversation = ? where id = ?`, s, convoId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func byteEmbedding(embedding []float32) []byte {
 	byteEmbedding := make([]byte, len(embedding)*4)
 	for i, v := range embedding {

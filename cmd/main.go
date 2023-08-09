@@ -38,6 +38,7 @@ func main() {
 	completer := completions.NewOpenAiCompleter(openaiClient, model)
 	embedder := embeddings.NewOpenAiEmbedder(openaiClient)
 	chatrr := chatrr.NewChatrr(db, embedder, completer)
+	chatrr.NewActiveConvo()
 
 	// Handle SIGINT
 	c := make(chan os.Signal, 1)
@@ -45,6 +46,7 @@ func main() {
 
 	go func() {
 		<-c
+		chatrr.StoreActiveConvo()
 		fmt.Println("\nGoodbye!")
 		os.Exit(0)
 	}()

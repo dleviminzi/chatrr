@@ -26,13 +26,15 @@ If you would like the bot to remember the response it gave to your last prompt t
 - [x] Add timestamps to conversation fragments
 - [x] Fix zero entry query sqlite vss explosion
 - [x] Make completion model configurable
-- [ ] Real conversation ids
+- [x] Real conversation ids
 - [ ] Claude support
+  - [ ] Model agnostic conversation object
 - [ ] Add feature for bot to ingest documents (stored seperately)
 - [ ] Add cli flagging for experimental features
+- [ ] API for front end to be built
 
 ## Experiments
-- [ ] Embed entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
+- [x] Embed entire conversation segment when memorizing (current strategy is ok, but why not just do the whole thing?)
 - [ ] Eviction policies for memories
 - [ ] During memorization use openai function api to get list of tags summarizing what is being memorized to store the embedding with
 - [ ] Research methods for calculating information density

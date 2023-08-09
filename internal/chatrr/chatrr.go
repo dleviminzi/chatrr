@@ -14,7 +14,7 @@ import (
 
 type DatabaseConnector interface {
 	GetConversationMemories(embedding []float32) ([]models.RecalledMemory, error)
-	CreateConversationMemories(embedding [][]float32, conversationId int, input []openai.ChatCompletionMessage) error
+	CreateConversationMemory(embedding []float32, conversationId int, input []openai.ChatCompletionMessage) error
 	CreateConversation([]openai.ChatCompletionMessage) (int, error)
 	UpdateConversatoin(convoId int, convo []openai.ChatCompletionMessage) error
 }
@@ -106,20 +106,24 @@ func (c Chatrr) Memorize(ctx context.Context, numBack int) {
 		start = convoLength - 2*numBack
 	}
 
-	embeddings := [][]float32{}
+	toEmbed := ""
 	for i := start; i < convoLength; i++ {
-		e, err := c.embedder.Embed(ctx, c.msgs[i].Content)
-		if err != nil {
-			// Memorize ignores errors? idk
-			log.Println(err.Error())
-			return
+		switch c.msgs[i].Role {
+		case openai.ChatMessageRoleAssistant:
+			toEmbed += openai.ChatMessageRoleAssistant + c.msgs[i].Content + "\n"
+		case openai.ChatMessageRoleUser:
+			toEmbed += openai.ChatMessageRoleUser + c.msgs[i].Content + "\n"
 		}
-
-		embeddings = append(embeddings, e)
 	}
 
-	// TODO: come up with conversation storage plan
-	err := c.db.CreateConversationMemories(embeddings, c.convoId, c.msgs[start:])
+	e, err := c.embedder.Embed(ctx, toEmbed)
+	if err != nil {
+		// Memorize ignores errors? idk
+		log.Println(err.Error())
+		return
+	}
+
+	err = c.db.CreateConversationMemory(e, c.convoId, c.msgs[start:])
 	if err != nil {
 		log.Println(err.Error())
 	}

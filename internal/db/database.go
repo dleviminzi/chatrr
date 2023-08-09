@@ -137,20 +137,8 @@ func (d *DatabaseConnection) Initialize() error {
 	return nil
 }
 
-func (d DatabaseConnection) CreateConversationMemories(memoryEmbeddings [][]float32, conversationId int, conversationFragment []openai.ChatCompletionMessage) error {
+func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, conversationId int, conversationFragment []openai.ChatCompletionMessage) error {
 	t := time.Now().Format(time.UnixDate)
-
-	for _, embedding := range memoryEmbeddings {
-		if err := d.CreateConversationMemory(embedding, conversationId, conversationFragment, t); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, conversationId int, conversationFragment []openai.ChatCompletionMessage, t string) error {
-	bytePromptEmbedding := byteEmbedding(memoryEmbedding)
 
 	strConversationFragment, err := stringifyConversationFragment(conversationFragment)
 	if err != nil {
@@ -161,19 +149,23 @@ func (d DatabaseConnection) CreateConversationMemory(memoryEmbedding []float32, 
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer tx.Rollback()
 
 	f, err := tx.Exec("INSERT INTO conversation_fragments (conversation_id, conversation_fragment, fragment_time) VALUES (?, ?, ?)", conversationId, strConversationFragment, t)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	id, err := f.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	bytePromptEmbedding := byteEmbedding(memoryEmbedding)
+
 	_, err = tx.Exec("INSERT INTO conversation_fragment_embeddings(rowid, embedding) values (?, ?)", id, bytePromptEmbedding)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return tx.Commit()

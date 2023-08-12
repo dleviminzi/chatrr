@@ -1,5 +1,7 @@
 github.com/asg017/sqlite-vss/bindings/go v0.0.0-20230701204031-14837c86af89 h1:ORcHo/kwAWTsM26IrfQgy8htAZCpsyAHzq9o22jOlvc=
 github.com/asg017/sqlite-vss/bindings/go v0.0.0-20230701204031-14837c86af89/go.mod h1:BlTaV0F1bZZ/7eHyb+MtcDxB/7aGrnD1yulja1lBXiM=
+github.com/dleviminzi/go-anthropic v0.1.0 h1:J5q9wfaqg/eX9XtdUl8c4HmeyJTEK4cIOFnMgLt30rI=
+github.com/dleviminzi/go-anthropic v0.1.0/go.mod h1:2f5QlTq8j6z92EP/8weanYqyFhGfM4wEH+pz2ZY4vjI=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=

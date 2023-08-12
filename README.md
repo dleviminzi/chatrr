@@ -28,7 +28,7 @@ If you would like the bot to remember the response it gave to your last prompt t
 - [x] Make completion model configurable
 - [x] Real conversation ids
 - [ ] Claude support
-  - [ ] Model agnostic conversation object
+  - [ ] Model agnostic conversation object (abstract openai.ChatCompletionMessage out)
 - [ ] Add feature for bot to ingest documents (stored seperately)
 - [ ] Add cli flagging for experimental features
 - [ ] API for front end to be built

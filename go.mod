@@ -9,4 +9,7 @@ require (
 	github.com/sashabaranov/go-openai v1.14.0
 )
 
-require github.com/hashicorp/errwrap v1.0.0 // indirect
+require (
+	github.com/dleviminzi/go-anthropic v0.1.0 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
+)
